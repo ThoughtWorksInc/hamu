@@ -69,7 +69,7 @@ class ExprEvaluator {
     definition.isExtern = true;
     definition.pack = ["hamu"];
     Context.defineType(definition);
-    Context.typeExpr(macro hamu.$className.raiseOnCreated());
+    Context.typeof(macro hamu.$className.raiseOnCreated());
     var result = temporaryValues[id];
     temporaryValues.remove(id);
     result;
