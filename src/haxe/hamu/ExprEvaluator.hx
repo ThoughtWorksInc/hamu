@@ -54,10 +54,42 @@ class ExprEvaluator {
     var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
     var definition = macro class $className {
       macro public static function onCreated():haxe.macro.Expr return {
-        hamu.ExprEvaluator.temporaryValues[$v{id}] = $expr;
+        hamu.ExprEvaluator.temporaryValues.set($v{id}, $expr);
         macro null;
       }
       @:extern public static inline function raiseOnCreated():Dynamic return onCreated();
+    }
+    definition.meta = [
+      {
+        name : ":access",
+        params : [macro hamu.ExprEvaluator],
+        pos : PositionTools.here()
+      }
+    ];
+    definition.isExtern = true;
+    definition.pack = ["hamu"];
+    Context.defineType(definition);
+    Context.typeof(macro hamu.$className.raiseOnCreated());
+    var result = temporaryValues[id];
+    temporaryValues.remove(id);
+    result;
+  }
+
+  @:noUsing
+  public static function evaluateInMacroContext<T>(expr:ExprOf<T>):T return {
+    var id = seed++;
+    var className = 'ExprEvaluator_$id';
+    var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
+    var definition = macro class $className {
+      macro public static function onCreated():haxe.macro.Expr return {
+        hamu.ExprEvaluator.temporaryValues.set($v{id}, $expr);
+        macro null;
+      }
+      macro public static function raiseOnCreated():haxe.macro.Expr return {
+        onCreated();
+        macro null;
+      }
+      @:extern public static inline function raiseRaiseOnCreated():Dynamic return raiseOnCreated();
     }
     definition.meta = [
       {
