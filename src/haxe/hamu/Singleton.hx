@@ -18,15 +18,17 @@ limitations under the License.
 */
 
 package hamu;
-import haxe.macro.TypeTools;
+import haxe.macro.ComplexTypeTools;
+import haxe.macro.MacroStringTools;
 import haxe.macro.Type;
 import haxe.macro.TypeTools;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.PositionTools;
 
-#if macro
 class Singleton {
+
+#if macro
 
   private static function proxyFields(fields:Array<ClassField>, typeResolver:Type -> Type, pos:Position):Array<Field> return {
     var buildingFields = [];
@@ -195,5 +197,31 @@ class Singleton {
     );
     buildingFields;
   }
-}
+
+  static var seed = 0;
+
+  public static function macroType<T>(instance:ExprOf<T>, ?singletonName:String):Type return {
+    var type = Context.typeof(instance);
+    switch TypeTools.toComplexType(type) {
+      case TPath(path):
+        var localName = path.sub == null ? path.name : path.sub;
+        if (singletonName == null) {
+          var id = seed++;
+          singletonName = '${localName}_Singleton_$id';
+        }
+        var definition = macro class $singletonName {};
+        definition.pack = path.pack;
+        definition.fields = hamu.Singleton.build(instance);
+        Context.defineType(definition);
+        ComplexTypeTools.toType(TPath({
+          pack: definition.pack,
+          name: definition.name
+        }));
+      default:
+        throw "Expect TPath";
+    }
+  }
+
 #end
+
+}

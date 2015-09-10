@@ -19,7 +19,9 @@ limitations under the License.
 
 package hamu;
 
+import haxe.macro.MacroType;
 import haxe.unit.TestCase;
+
 class SingletonTest extends TestCase {
   function test() {
     assertEquals("123 42", MySingleton.toString(123));
@@ -36,8 +38,19 @@ class SingletonTest extends TestCase {
     assertEquals(45, MySingleton4.y);
     assertEquals("789 45", MySingleton4.formatString(789));
     assertEquals(new MyAbstract(45), MySingleton4._new());
+    assertEquals(1, MacroTypeSingleton.foo());
   }
 }
+
+class MacroTypeInstance {
+
+  public function new() {}
+
+  public function foo() return 1;
+
+}
+
+typedef MacroTypeSingleton = MacroType<[hamu.Singleton.macroType(new hamu.SingletonTest.MacroTypeInstance())]>;
 
 @:build(hamu.Singleton.build(new MyClass(42)))
 class MySingleton {}
