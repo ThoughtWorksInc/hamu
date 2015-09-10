@@ -19,11 +19,21 @@ limitations under the License.
 
 package hamu;
 
+import haxe.macro.Context;
 import haxe.macro.Expr;
 import hamu.ExprEvaluator;
 import haxe.unit.TestCase;
 
 class ExprEvaluatorTest extends TestCase {
+
+  macro static function postMacro():Expr return {
+    var result = ExprEvaluator.runInMacroContext(function()return Context.defined("macro"));
+    macro $v{result};
+  }
+
+  function testPost():Void {
+    assertEquals(true, postMacro());
+  }
 
   macro static function evaluate():Expr return {
     var expr = macro ["a", "b"].length;

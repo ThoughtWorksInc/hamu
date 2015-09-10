@@ -106,5 +106,19 @@ class ExprEvaluator {
     temporaryValues.remove(id);
     result;
   }
+
+  static var functionsById = new Map<Int, Void->Dynamic>();
+
+  public static function runFunction(id:Int):Dynamic return {
+    var f = functionsById[id];
+    functionsById.remove(id);
+    f();
+  }
+
+  public static function runInMacroContext<T>(f:Void->T):T return {
+    var id = seed++;
+    functionsById[id] = f;
+    evaluateInMacroContext(macro hamu.ExprEvaluator.runFunction($v{id}));
+  }
 #end
 }
