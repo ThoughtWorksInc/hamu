@@ -48,14 +48,20 @@ class ExprEvaluator {
   static var seed:Int = 0;
 
   @:noUsing
-  public static function evaluate<T>(expr:ExprOf<T>):T return {
+  public static function parseAndEvaluate(exprText:String):Dynamic return {
+    var expr:ExprOf<Dynamic> = Context.parse(exprText, PositionTools.here());
+    evaluate(macro cast $expr);
+  }
+
+  @:noUsing
+  public static function evaluate(expr:Expr):Dynamic return {
     var id = seed++;
     var className = 'ExprEvaluator_$id';
     var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
     var definition = macro class $className {
       macro public static function onCreated():haxe.macro.Expr return {
-        hamu.ExprEvaluator.temporaryValues.set($v{id}, $expr);
-        macro null;
+      hamu.ExprEvaluator.temporaryValues.set($v{id}, $expr);
+      macro null;
       }
       @:extern public static inline function raiseOnCreated():Dynamic return onCreated();
     }
@@ -76,7 +82,7 @@ class ExprEvaluator {
   }
 
   @:noUsing
-  public static function evaluateInMacroContext<T>(expr:ExprOf<T>):T return {
+  public static function evaluateInMacroContext(expr:Expr):Dynamic return {
     var id = seed++;
     var className = 'ExprEvaluator_$id';
     var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());

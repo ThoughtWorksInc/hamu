@@ -198,16 +198,13 @@ class Singleton {
     buildingFields;
   }
 
-  static var seed = 0;
-
   public static function macroType<T>(instance:ExprOf<T>, ?singletonName:String):Type return {
     var type = Context.typeof(instance);
     switch TypeTools.toComplexType(type) {
       case TPath(path):
         var localName = path.sub == null ? path.name : path.sub;
         if (singletonName == null) {
-          var id = seed++;
-          singletonName = '${localName}_Singleton_$id';
+          singletonName = '${localName}_Singleton';
         }
         var definition = macro class $singletonName {};
         definition.pack = path.pack;
@@ -224,4 +221,21 @@ class Singleton {
 
 #end
 
+  macro public static function defineSingleton<T>(instance:ExprOf<T>, ?singletonName:String):Expr return {
+    var type = Context.typeof(instance);
+    switch TypeTools.toComplexType(type) {
+      case TPath(path):
+        var localName = path.sub == null ? path.name : path.sub;
+        if (singletonName == null) {
+          singletonName = '${localName}_Singleton';
+        }
+        var definition = macro class $singletonName {};
+        definition.pack = path.pack;
+        definition.fields = hamu.Singleton.build(instance);
+        Context.defineType(definition);
+        MacroStringTools.toFieldExpr(definition.pack.concat([definition.name]));
+      default:
+        throw "Expect TPath";
+    }
+  }
 }
