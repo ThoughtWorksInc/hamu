@@ -27,11 +27,13 @@ addons:
     - mono-devel
 
 before_install:
+ - travis_retry wget http://nekovm.org/media/neko-2.0.0-linux64.tar.gz
+ - tar zxvf neko-2.0.0-linux64.tar.gz
  - travis_retry wget http://hxbuilds.s3-website-us-east-1.amazonaws.com/builds/haxe/linux64/"$HAXE_FILE"
  - tar zxvf "$HAXE_FILE"
  - mv haxe-*/ haxe/
- - export PATH=$PATH:`pwd`/haxe
- - export HAXE_STD_PATH=`pwd`/haxe/std
+ - export PATH=$PATH:$PWD/haxe:$PWD/neko-2.0.0-linux
+ - export HAXE_STD_PATH=$PWD/haxe/std
  - travis_retry haxelib setup .haxelib-local
  - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
  - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
