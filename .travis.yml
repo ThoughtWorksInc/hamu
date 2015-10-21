@@ -25,7 +25,7 @@ addons:
   apt:
     packages:
     - mono-devel
-    - libgc
+    - libgc1c2
 
 before_install:
  - travis_retry wget http://nekovm.org/media/neko-2.0.0-linux64.tar.gz
