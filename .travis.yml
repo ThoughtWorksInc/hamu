@@ -1,0 +1,39 @@
+sudo: false
+
+language: scala
+
+scala:
+  - 2.11.7
+  - 2.10.5
+
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk7
+
+env:
+  matrix:
+    # Haxe 3.2.0
+    - SBT_COMMAND=test HAXE_TARGET=java HAXE_FILE=haxe_2015-05-12_master_77d171b.tar.gz
+    - SBT_COMMAND=test-csharp:run HAXE_TARGET=cs HAXE_FILE=haxe_2015-05-12_master_77d171b.tar.gz
+
+    # Haxe 3.2.1
+    - SBT_COMMAND=test HAXE_TARGET=java HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-csharp:run HAXE_TARGET=cs HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+
+addons:
+  apt:
+    packages:
+    - mono-devel
+
+before_install:
+ - travis_retry wget http://hxbuilds.s3-website-us-east-1.amazonaws.com/builds/haxe/linux64/"$HAXE_FILE"
+ - tar zxvf "$HAXE_FILE"
+ - mv haxe-*/ haxe/
+ - export PATH=$PATH:`pwd`/haxe
+ - export HAXE_STD_PATH=`pwd`/haxe/std
+ - travis_retry haxelib setup .haxelib-local
+ - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
+ - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
+
+script: sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
