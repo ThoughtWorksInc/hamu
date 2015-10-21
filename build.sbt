@@ -29,6 +29,35 @@ developers := List(
 
 haxelibContributors := Seq("Atry")
 
+homepage := Some(url(s"https://github.com/ThoughtWorksInc/${name.value}"))
+
+startYear := Some(2015)
+
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+import ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepTask(publish in Haxe),
+  publishArtifacts,
+  setNextVersion,
+  commitNextVersion,
+  releaseStepCommand("sonatypeRelease"),
+  pushChanges
+)
+
+scmInfo := Some(ScmInfo(
+  url(s"https://github.com/ThoughtWorksInc/${name.value}"),
+  s"scm:git:git://github.com/ThoughtWorksInc/${name.value}.git",
+  Some(s"scm:git:git@github.com:ThoughtWorksInc/${name.value}.git")))
+
 licenses += "MIT" -> url("https://opensource.org/licenses/MIT")
 
 haxelibReleaseNote := "Initial release"
