@@ -7,10 +7,6 @@ cache:
 
 language: scala
 
-scala:
-  - 2.11.7
-  - 2.10.5
-
 jdk:
   - oraclejdk8
   - oraclejdk7
@@ -47,7 +43,7 @@ before_install:
 
 script:
   - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
-  
+
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
