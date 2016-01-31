@@ -18,7 +18,7 @@ class Builder<Argument> {
 
   #if macro
 
-  public function defineClass(argument:Argument, buildingModule:String, ?buildingClassName:String):Void {
+  public function defineClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta: Metadata):Void {
     var parserPackage = buildingModule.split(".");
     var moduleName = parserPackage.pop();
     var parserDefinition = {
@@ -26,7 +26,7 @@ class Builder<Argument> {
       name: buildingClassName == null ? moduleName : buildingClassName,
       pos: PositionTools.here(),
       params: null,
-      meta: null,
+      meta: meta,
       kind: TDClass(null, [], false),
       isExtern: false,
       fields: fieldsGenerator.fields(argument, buildingModule, buildingClassName == null ? moduleName : buildingClassName)
@@ -35,9 +35,9 @@ class Builder<Argument> {
   }
 
 
-  public function defineMacroClass(argument:Argument, buildingModule:String, ?buildingClassName:String):Void {
+  public function defineMacroClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta: Metadata):Void {
     hamu.ExprEvaluator.runInMacroContext(function () {
-      defineClass(argument, buildingModule, buildingClassName);
+      defineClass(argument, buildingModule, buildingClassName, meta);
     });
   }
 
