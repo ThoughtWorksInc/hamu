@@ -62,7 +62,7 @@ scmInfo := Some(ScmInfo(
 
 licenses += "Apache" -> url("http://www.apache.org/licenses/LICENSE-2.0")
 
-haxelibReleaseNote := "Initial release"
+haxelibReleaseNote := "Add lazyDefineClass and lazyDefineMacroClass functions"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
