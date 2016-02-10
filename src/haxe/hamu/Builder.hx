@@ -3,6 +3,7 @@ package hamu;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.PositionTools;
+import haxe.ds.StringMap;
 
 typedef FieldsGenerator<Argument> = {
   function fields(argument:Argument, buildingModule:String, buildingClassName:String):Array<Field>;
@@ -18,7 +19,42 @@ class Builder<Argument> {
 
   #if macro
 
-  public function defineClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta: Metadata):Void {
+
+  /**
+   * Define a class `buildingModule`.`buildingClassName` with metadata `meta`.
+   *
+   * If calling this method to generate same class more than once,
+   * the second call will be ignored.
+   */
+  public function lazyDefineClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta:Metadata):Void {
+    var parserPackage = buildingModule.split(".");
+    var moduleName = parserPackage.pop();
+    var parserDefinition = {
+      pack: parserPackage,
+      name: buildingClassName == null ? moduleName : buildingClassName,
+      pos: PositionTools.here(),
+      params: null,
+      meta: meta,
+      kind: TDClass(null, [], false),
+      isExtern: false,
+      fields: fieldsGenerator.fields(argument, buildingModule, buildingClassName == null ? moduleName : buildingClassName)
+    };
+    Context.onTypeNotFound(function(name) return {
+      if (name == buildingModule) {
+        parserDefinition;
+      } else {
+        null;
+      }
+    });
+  }
+
+  /**
+   * Define a class `buildingModule`.`buildingClassName` with metadata `meta`.
+   *
+   * If calling this method to generate same class more than once,
+   * a compilation error will be raised.
+   */
+  public function defineClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta:Metadata):Void {
     var parserPackage = buildingModule.split(".");
     var moduleName = parserPackage.pop();
     var parserDefinition = {
@@ -34,8 +70,19 @@ class Builder<Argument> {
     Context.defineModule(buildingModule, [ parserDefinition ]);
   }
 
+  public function lazyDefineMacroClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta:Metadata):Void {
+    hamu.ExprEvaluator.runInMacroContext(function () {
+      lazyDefineClass(argument, buildingModule, buildingClassName, meta);
+    });
+  }
 
-  public function defineMacroClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta: Metadata):Void {
+  /**
+   * Define a class `buildingModule`.`buildingClassName` with metadata `meta` in macro scope.
+   *
+   * If calling this method to generate same class more than once,
+   * a compilation error will be raised.
+   */
+  public function defineMacroClass(argument:Argument, buildingModule:String, ?buildingClassName:String, ?meta:Metadata):Void {
     hamu.ExprEvaluator.runInMacroContext(function () {
       defineClass(argument, buildingModule, buildingClassName, meta);
     });
