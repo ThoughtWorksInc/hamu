@@ -68,3 +68,5 @@ haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
   "macro", "utility"
 )
+
+doc in Compile <<= doc in Haxe
